@@ -3,7 +3,7 @@ import torch.nn as nn
 from transformers import BertModel
 
 
-class BertTextClassifier(nn.Module):  # 这里修复了！之前少打了一个n
+class BertTextClassifier(nn.Module):  
     def __init__(self, dropout=0.3):
         super().__init__()
 
@@ -30,7 +30,7 @@ class BertTextClassifier(nn.Module):  # 这里修复了！之前少打了一个n
 
 
 def get_param_grid():
-    # BERT 微调专属超参数（小学习率！）
+    # BERT 微调专属超参数（小学习率）
     return [
         {"dropout": 0.3, "lr": 2e-5},
         {"dropout": 0.5, "lr": 1e-5},
