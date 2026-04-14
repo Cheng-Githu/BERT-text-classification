@@ -2,41 +2,36 @@ import torch
 import torch.nn as nn
 from transformers import BertModel
 
-class GRUTextClassifier(nn.Module):
-    def __init__(self, hidden_dim=128, num_layers=1, bidirectional=True):
+
+class BertTextClassifier(nn.Module):  # 这里修复了！之前少打了一个n
+    def __init__(self, dropout=0.3):
         super().__init__()
 
-        # BERT
-        self.bert = BertModel.from_pretrained("bert-base-uncased",
-    local_files_only=False,  # 优先从本地加载，无则下载
-    cache_dir="./bert_cache"  # 缓存BERT模型到本地，避免重复下载
-)
-        for param in self.bert.parameters():
-            param.requires_grad = False
-
-        # GRU
-        self.gru = nn.GRU(
-            input_size=768,
-            hidden_size=hidden_dim,
-            num_layers=num_layers,
-            batch_first=True,
-            bidirectional=bidirectional,
-            dropout=0.3 if num_layers > 1 else 0
+        # 加载预训练 BERT
+        self.bert = BertModel.from_pretrained(
+            "bert-base-uncased",
+            cache_dir="./bert_cache"
         )
 
-        out_dim = hidden_dim * 2 if bidirectional else hidden_dim
-        self.fc = nn.Linear(out_dim, 1)
+        # 分类头
+        self.dropout = nn.Dropout(dropout)
+        self.fc = nn.Linear(768, 1)  # BERT-base 输出维度固定 768
         self.sigmoid = nn.Sigmoid()
 
     def forward(self, input_ids, attention_mask):
-        bert_out = self.bert(input_ids=input_ids, attention_mask=attention_mask).last_hidden_state
-        gru_out, _ = self.gru(bert_out)
-        feat = gru_out[:, -1, :]
+        # BERT 前向传播
+        bert_out = self.bert(input_ids=input_ids, attention_mask=attention_mask)
+        cls_feat = bert_out.pooler_output  # 取 <CLS> 句子特征
+
+        # 分类输出
+        feat = self.dropout(cls_feat)
         out = self.fc(feat)
         return self.sigmoid(out).squeeze()
 
+
 def get_param_grid():
+    # BERT 微调专属超参数（小学习率！）
     return [
-        {"hidden_dim": 128, "num_layers": 1, "lr": 1e-3, "bidirectional": True},
-        {"hidden_dim": 256, "num_layers": 1, "lr": 5e-4, "bidirectional": True},
+        {"dropout": 0.3, "lr": 2e-5},
+        {"dropout": 0.5, "lr": 1e-5},
     ]
