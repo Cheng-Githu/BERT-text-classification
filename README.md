@@ -1,60 +1,38 @@
-### 2. BERT 模型的 `README.md`（纯Markdown内容）
-```markdown
+
 # BERT 文本分类模型
-
 ## 项目介绍
-这是一个**基于BERT-base的二分类文本分类模型**，针对新闻文本分类任务开发。
-模型采用「预训练+微调」的迁移学习范式，复用在海量通用文本上预训练好的语义能力，仅在目标数据集上做微调，实现高精度分类。
-
+模型采用「预训练+微调」的迁移学习范式，复用在海量通用文本上预训练好的语义能力，仅在目标数据集上做微调，实现文本分类。
 ## 环境依赖
-```bash
-pip install torch scikit-learn numpy transformers
-依赖说明：
-Python >= 3.8
-PyTorch >= 1.10
-scikit-learn >= 1.0
-NumPy >= 1.21
-Transformers >= 4.0 （Hugging Face Transformers，用于加载 BERT 预训练模型）
-文件说明
-plaintext
-BERT/
-├── model.py        # BERT模型结构定义、超参数搜索网格
-├── train.py        # 数据预处理、训练、评估完整脚本
-├── news_dataset.pkl # 新闻二分类数据集
-├── bert_cache/     # BERT预训练模型缓存目录（首次运行自动生成）
-└── README.md       # 项目说明文档
-快速开始
-激活项目 conda 环境
-bash
-运行
-conda activate gru
-进入项目目录
-bash
-运行
-cd 深度第二次作业/BERT
-一键启动训练
-bash
-运行
-python train.py
-注意：
-首次运行会自动下载bert-base-uncased预训练模型，缓存到bert_cache目录，后续运行无需重复下载
-Windows 环境下首次下载可能会弹出少量缓存警告，属于正常现象，不影响运行结果
-程序自动检测 CUDA GPU，自动使用 GPU 加速训练
-模型流程与优化
-完整分类流程
-文本预处理：使用 BERT 官方 Subword 分词器，自动处理分词、未登录词，生成 BERT 标准输入（input_ids + attention_mask）
-预训练语义编码：加载在海量通用文本上预训练好的 BERT 模型，提取通用上下文语义特征
-句子特征提取：取 BERT 输出的<CLS>特殊 token 的池化输出，作为整个句子的全局语义特征
-分类输出：经过 Dropout 正则化后，通过全连接层 + Sigmoid 输出分类概率
-优化措施
-迁移学习：复用 16GB 通用文本的预训练语义知识，解决小数据集语义学习不足的问题
-微调策略：小学习率微调，保护预训练参数，避免灾难性遗忘
-训练优化：AdamW 优化器、梯度裁剪、早停机制，保证微调过程稳定收敛
-正则化：Dropout 防止微调阶段过拟合，提升模型泛化能力
-实验结果
-在测试集上的最终评估结果：
-最高分类准确率：83.82%
-最优超参数：
-python
-运行
-{"dropout": 0.3, "lr": 2e-5}
+pip install -r requirements.txt  
+## 文件说明
+├── model.py        # BERT模型结构定义、超参数搜索网格  
+├── train.py        # 数据预处理、训练、评估完整脚本  
+├── requirements.txt # 环境依赖  
+├── news_dataset.pkl # 新闻二分类数据集  
+├── bert_cache/     # BERT预训练模型缓存目录（首次运行自动生成）  
+└── README.md       # 项目说明文档  
+## 激活项目 conda 环境
+conda activate 虚拟环境名称  
+#进入项目目录  
+cd 文件名称  
+#启动训练  
+python train.py  
+## 注意
+首次运行会自动下载bert-base-uncased预训练模型，缓存到bert_cache目录，后续运行无需重复下载  
+Windows 环境下首次下载可能会弹出少量缓存警告，属于正常现象，不影响运行结果  
+程序自动检测 CUDA GPU，自动使用 GPU 加速训练  
+## 模型分类流程
+文本预处理：使用 BERT 官方 Subword 分词器，自动处理分词、未登录词，生成 BERT 标准输入（input_ids + attention_mask）  
+预训练语义编码：加载在海量通用文本上预训练好的 BERT 模型，提取通用上下文语义特征  
+句子特征提取：取 BERT 输出的<CLS>特殊 token 的池化输出，作为整个句子的全局语义特征  
+分类输出：经过 Dropout 正则化后，通过全连接层 + Sigmoid 输出分类概率  
+## 优化措施
+迁移学习：复用 16GB 通用文本的预训练语义知识，解决小数据集语义学习不足的问题  
+微调策略：小学习率微调，保护预训练参数，避免灾难性遗忘  
+训练优化：AdamW 优化器、梯度裁剪、早停机制，保证微调过程稳定收敛  
+正则化：Dropout 防止微调阶段过拟合，提升模型泛化能力  
+## 实验结果
+在测试集上的最终评估结果：  
+最高分类准确率：83.82%  
+最优超参数：  
+{"dropout": 0.3, "lr": 2e-5}  
